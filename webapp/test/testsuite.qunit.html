@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>OPA5 Tests</title>
+
+    <!-- UI5 Bootstrap -->
+    <script
+        id="sap-ui-bootstrap"
+        src="../resources/sap-ui-core.js"
+        data-sap-ui-theme="sap_fiori_3"
+        data-sap-ui-async="true">
+    </script>
+
+    <!-- QUnit -->
+    <link rel="stylesheet" href="../resources/sap/ui/thirdparty/qunit-2.css">
+    <script src="../resources/sap/ui/thirdparty/qunit-2.js"></script>
+
+    <script>
+        sap.ui.getCore().attachInit(function () {
+            sap.ui.require([
+                "test/integration/MainJourney"
+            ], function () {
+                QUnit.start();
+            });
+        });
+    </script>
+</head>
+
+<body>
+    <div id="qunit"></div>
+    <div id="qunit-fixture"></div>
+</body>
+</html>

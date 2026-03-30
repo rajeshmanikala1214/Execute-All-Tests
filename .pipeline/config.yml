@@ -4,12 +4,41 @@ general:
 stages:
 
   Additional Unit Tests:
+    wdi5Tests:
+      type: npmExecuteTests
+      params:
+        script: this
+        dockerImage: "node:24-bookworm"
+        installCommand: "npm ci"
+        runCommand: "npm run wdi5"
+        baseUrl: "http://example.com/index.html"
+        urlOptionPrefix: "--base-url="
+        usernameEnvVar: "wdi5_username"
+        passwordEnvVar: "wdi5_password"
+        envs:
+          - "NPM_CONFIG_PREFIX=~/.npm-global"
+        paths:
+          - "~/.npm-global/bin"
+        verbose: true
 
-    npmExecuteScripts:
-      runScripts:
-        - test:opa      # OPA5 (Karma)
-        - test:wdi5     # wdi5 tests
-        - test:uiveri5  # UIVeri5 tests
+    uiveri5Tests:
+      type: npmExecuteTests
+      params:
+        script: this
+        dockerImage: "node:24-bookworm"
+        installCommand: "npm install @ui5/uiveri5 --global --quiet"
+        runCommand: "/home/node/.npm-global/bin/uiveri5"
+        baseUrl: "http://localhost:8080/index.html"
+        urlOptionPrefix: "--base-url="
+        usernameEnvVar: "PIPER_SELENIUM_HUB_USER"
+        passwordEnvVar: "PIPER_SELENIUM_HUB_PASSWORD"
+        envs:
+          - "NPM_CONFIG_PREFIX=~/.npm-global"
+        paths:
+          - "~/.npm-global/bin"
+        runOptions:
+          - "--seleniumAddress=http://localhost:4444/wd/hub"
+        verbose: true
 
     testsPublishResults:
       failOnError: false
@@ -21,7 +50,6 @@ stages:
         archive: true
 
   Static Code Checks:
-
     sonarExecuteScan:
       serverUrl: "https://sonar-dev.releaseowl.com"
       projectKey: "execute-test-cases"

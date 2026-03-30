@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "scripts": {
     "start": "ui5 serve",
+    "karma": "karma start karma.conf.js",
     "test:opa": "karma start karma.conf.js",
     "test:wdi5": "wdio run wdio.conf.js",
     "test:uiveri5": "uiveri5",

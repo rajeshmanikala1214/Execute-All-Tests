@@ -1,0 +1,31 @@
+general:
+  buildTool: "npm"
+
+stages:
+  Additional Unit Tests:
+    npmExecuteScripts:
+      runScripts:
+        - test:opa
+        - test:wdi5
+
+    karmaExecuteTests: {}
+
+    uiVeri5ExecuteTests:
+      runOptions:
+        - "--seleniumAddress=http://localhost:4444/wd/hub"
+        - "./conf.js"
+
+    testsPublishResults:
+      failOnError: false
+      junit:
+        pattern: "**/reports/TESTS.xml"
+        archive: true
+      cobertura:
+        pattern: "**/coverage/coverage.xml"
+        archive: true
+
+  Static Code Checks:
+    sonarExecuteScan:
+      serverUrl: "http://your-sonar-server"
+      projectKey: "execute-test-cases"
+      waitForQualityGate: true

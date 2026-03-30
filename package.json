@@ -2,6 +2,7 @@
   "name": "execute-test-cases",
   "version": "1.0.0",
   "scripts": {
+    "install": "npm install",
     "start": "ui5 serve",
     "test:opa": "karma start karma.conf.js",
     "test:wdi5": "wdio run wdio.conf.js",

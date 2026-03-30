@@ -2,18 +2,14 @@ general:
   buildTool: "npm"
 
 stages:
+
   Additional Unit Tests:
+
     npmExecuteScripts:
       runScripts:
-        - test:opa
-        - test:wdi5
-
-    karmaExecuteTests: {}
-
-    uiVeri5ExecuteTests:
-      runOptions:
-        - "--seleniumAddress=http://localhost:4444/wd/hub"
-        - "./conf.js"
+        - test:opa      # OPA5 (Karma)
+        - test:wdi5     # wdi5 tests
+        - test:uiveri5  # UIVeri5 tests
 
     testsPublishResults:
       failOnError: false
@@ -25,7 +21,8 @@ stages:
         archive: true
 
   Static Code Checks:
+
     sonarExecuteScan:
-      serverUrl: "http://your-sonar-server"
+      serverUrl: "https://sonar-dev.releaseowl.com"
       projectKey: "execute-test-cases"
       waitForQualityGate: true

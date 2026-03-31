@@ -3,9 +3,9 @@
   "version": "1.0.0",
   "scripts": {
     "start": "ui5 serve --port 8080",
-    "test:opa:ci": "sleep 15 && npm run test:opa",
+    "test:opa:ci": "sleep 40 && npm run test:opa",
     "wdi5:ci": "sleep 10 && npm run wdi5",
-    "test:opa": "ui5-test-runner --url http://localhost:8080/test/testsuite.qunit.html --start \"ui5 serve --port 8080\" --browser \"webdriver --url http://selenium:4444/wd/hub --browserName chrome\"",
+    "test:opa": "ui5-test-runner --url http://host.docker.internal:8080/test/testsuite.qunit.html --start \"ui5 serve --port 8080\" --browser \"webdriver --url http://selenium:4444/wd/hub --browserName chrome\"",
     "wdi5": "wdio run wdio.conf.js",
     "test:uiveri5": "uiveri5",
     "test": "npm run test:opa"

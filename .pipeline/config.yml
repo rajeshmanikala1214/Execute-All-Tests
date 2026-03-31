@@ -8,7 +8,7 @@ stages:
       type: npmExecuteTests
       params:
         script: this
-        dockerImage: "node:24-bookworm"
+        dockerImage: "devxci/mbtci-java17-node20"
         runAsRoot: true
         dockerSidecarImage: 'selenium/standalone-chrome'
         installCommand: "npm ci"
@@ -27,8 +27,8 @@ stages:
       type: npmExecuteTests
       params:
         script: this
-        dockerImage: "node:24-bookworm"
-        dockerImage: 'node:24-bookworm'
+        dockerImage: "devxci/mbtci-java17-node20"
+        dockerImage: 'ndevxci/mbtci-java17-node20'
         runAsRoot: true
         installCommand: "npm install @ui5/uiveri5 --global --quiet"
         runCommand: "/home/node/.npm-global/bin/uiveri5"

@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "scripts": {
     "start": "ui5 serve --port 8080",
-    "test:opa:ci": "npm run test:opa",
+    "test:opa:ci": "sleep 30 && npm run test:opa",
     "wdi5:ci": "ui5 serve --port 8080 & sleep 10 && wdio run wdio.conf.js",
     "test:opa": "ui5-test-runner --url http://host.docker.internal:8080/test/testsuite.qunit.html --start \"ui5 serve --port 8080\" --browser \"webdriver --url http://selenium:4444 --browserName chrome\"",
     "wdi5": "wdio run wdio.conf.js",

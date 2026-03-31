@@ -3,29 +3,38 @@ exports.config = {
     specs: [
         './test/wdio/**/*.test.js'
     ],
-    maxInstances: 1, // only 1 Chrome at a time
+    maxInstances: 1,
     capabilities: [{
         browserName: 'chrome',
         'goog:chromeOptions': {
             args: [
-                '--headless',         // run headless in Docker
-                '--no-sandbox',       // required for Docker
+                '--headless',
+                '--no-sandbox',
                 '--disable-dev-shm-usage',
-                '--disable-gpu'
+                '--disable-gpu',
+                '--window-size=1920,1080' // Good practice for consistent screenshots
             ]
         }
     }],
+    
+    // Connection Settings
+    hostname: 'selenium',
+    port: 4444,
+    path: '/', // Try '/' if '/wd/hub' causes 404 errors
+    
     logLevel: 'info',
-    bail: 0,
-    baseUrl: 'http://localhost',
+    baseUrl: 'http://localhost:8080', // Ensure this matches your UI5 serve port
+    
     waitforTimeout: 10000,
     connectionRetryTimeout: 120000,
     connectionRetryCount: 3,
 
-    // Use Selenium container hostname, not localhost
-    hostname: 'selenium',       // match your sidecarName in pipeline
-    port: 4444,
-    path: '/wd/hub',
-
-    services: [], // no local chromedriver, using remote Selenium
+    // Required for WDI5 features
+    services: ['ui5'], 
+    
+    framework: 'mocha',
+    mochaOpts: {
+        ui: 'bdd',
+        timeout: 60000
+    }
 };

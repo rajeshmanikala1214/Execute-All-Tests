@@ -9,6 +9,8 @@ stages:
       params:
         script: this
         dockerImage: "node:24-bookworm"
+        runAsRoot: true
+        dockerSidecarImage: 'selenium/standalone-chrome'
         installCommand: "npm ci"
         runCommand: "npm run wdi5"
         baseUrl: "http://example.com/index.html"
@@ -26,6 +28,8 @@ stages:
       params:
         script: this
         dockerImage: "node:24-bookworm"
+        dockerImage: 'node:24-bookworm'
+        runAsRoot: true
         installCommand: "npm install @ui5/uiveri5 --global --quiet"
         runCommand: "/home/node/.npm-global/bin/uiveri5"
         baseUrl: "http://localhost:8080/index.html"

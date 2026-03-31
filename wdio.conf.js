@@ -23,7 +23,7 @@ exports.config = {
     path: '/', // Try '/' if '/wd/hub' causes 404 errors
     
     logLevel: 'info',
-    baseUrl: 'http://host.docker.internal:8080', // Ensure this matches your UI5 serve port
+    baseUrl: 'http://node:8080', // Ensure this matches your UI5 serve port
     
     waitforTimeout: 10000,
     connectionRetryTimeout: 120000,
@@ -33,7 +33,7 @@ exports.config = {
     services: ['ui5'], 
     
     ui5: {
-        url: 'http://host.docker.internal:8080'  // ✅ IMPORTANT
+        url: 'http://node:8080'  // ✅ IMPORTANT
     },
 
     framework: 'mocha',

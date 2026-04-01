@@ -25,6 +25,8 @@
     "karma-junit-reporter": "^2",
     "karma-coverage": "^2",
 
+    "selenium-webdriver": "^4",
+
     "@wdio/cli": "^8",
     "@wdio/junit-reporter": "^8",
     "@wdio/local-runner": "^8",

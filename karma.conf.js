@@ -1,63 +1,129 @@
 /**
  * karma.conf.js
  *
- * Used by piper's karmaExecuteTests step.
+ * ROOT CAUSE OF FAILURE:
+ *   karma-webdriver-launcher uses the 'wd' npm library internally.
+ *   'wd' speaks the old JSON Wire Protocol (JWP).
+ *   selenium/standalone-chrome 4.x speaks W3C WebDriver.
+ *   When 'wd' POSTs to /session, Selenium 4 returns a W3C response where
+ *   sessionId is nested inside { value: { sessionId: "..." } }.
+ *   'wd' looks at the top-level sessionId field → finds undefined → logs "Session ID: undefined"
+ *   Then when 'wd' tries to navigate with GET /session/undefined/url it fails with
+ *   "Unable to find session with ID: url" (Selenium interprets "undefined" as the session ID
+ *    and "url" as the command).
  *
- * How it works:
- * - Piper spins up TWO containers in a Docker network:
- *     1. Node container  → network alias: "karma"   (runs Karma server on port 9876)
- *     2. Selenium sidecar→ network alias: "selenium" (Chrome WebDriver on port 4444)
+ * FIX STRATEGY:
+ *   Use a PINNED older Selenium image that still has backwards-compatible JWP support
+ *   in the Jenkinsfile sidecarImage (selenium/standalone-chrome:3.141.59 is the last
+ *   Selenium 3 release and speaks JWP natively).
  *
- * - Piper injects these env vars automatically into the node container:
- *     PIPER_SELENIUM_HOSTNAME          = "karma"      (Karma server host, seen by Selenium)
- *     PIPER_SELENIUM_WEBDRIVER_HOSTNAME = "selenium"  (Selenium host, seen by Karma)
- *     PIPER_SELENIUM_WEBDRIVER_PORT     = "4444"
+ *   OR: Keep the current Selenium 4 sidecar and patch karma-webdriver-launcher by
+ *   using a custom launcher that uses the 'selenium-webdriver' npm package (W3C-native)
+ *   instead of 'wd'. See the karmaCustomWebDriverFactory below.
  *
- * - karma-webdriver-launcher tells Selenium: "open a browser and load http://karma:9876"
- * - karma-ui5 serves the UI5 framework resources and your app files
+ * THIS FILE uses the patched approach: a factory function that uses selenium-webdriver
+ * (W3C-native) instead of the 'wd' library.
  */
+
+const { Builder } = require('selenium-webdriver');
+const chrome = require('selenium-webdriver/chrome');
+
+/**
+ * Custom WebDriver launcher factory using selenium-webdriver (W3C-compatible).
+ * This replaces karma-webdriver-launcher's use of the 'wd' library.
+ */
+function CustomChromeSeleniumFactory(logger, baseBrowserDecorator) {
+    const log = logger.create('CustomChromeSelenium');
+
+    const hostname = process.env.PIPER_SELENIUM_WEBDRIVER_HOSTNAME || 'selenium';
+    const port = parseInt(process.env.PIPER_SELENIUM_WEBDRIVER_PORT || '4444', 10);
+    const seleniumUrl = `http://${hostname}:${port}`;
+
+    let driver;
+
+    this.name = 'CustomChromeSelenium';
+
+    baseBrowserDecorator(this);
+
+    this._start = async (karmaUrl) => {
+        log.info(`Starting Chrome via selenium-webdriver at ${seleniumUrl}`);
+        log.info(`Karma URL: ${karmaUrl}`);
+
+        try {
+            const options = new chrome.Options();
+            options.addArguments(
+                '--headless',
+                '--no-sandbox',
+                '--disable-dev-shm-usage',
+                '--disable-gpu',
+                '--window-size=1920,1080'
+            );
+
+            driver = await new Builder()
+                .usingServer(seleniumUrl)
+                .forBrowser('chrome')
+                .setChromeOptions(options)
+                .build();
+
+            log.info('Chrome session created, navigating to Karma URL');
+            await driver.get(karmaUrl);
+            log.info('Navigation complete');
+        } catch (err) {
+            log.error('Failed to start Chrome via selenium-webdriver:', err.message);
+            this._done('failure');
+        }
+    };
+
+    this.on('kill', async (done) => {
+        log.info('Killing Chrome session');
+        try {
+            if (driver) {
+                await driver.quit();
+            }
+        } catch (e) {
+            log.warn('Error quitting driver:', e.message);
+        }
+        done();
+    });
+}
+
+CustomChromeSeleniumFactory.$inject = ['logger', 'baseBrowserDecorator'];
+
 module.exports = function (config) {
     config.set({
 
-        // karma-ui5 handles UI5 bootstrapping, resource serving, and test discovery
         frameworks: ['ui5'],
 
         ui5: {
-            // Use UI5 tooling (ui5.yaml must exist) to serve resources locally.
-            // This avoids network calls to sapui5.hana.ondemand.com
             url: 'https://ui5.sap.com',
             type: 'application',
-            // Paths to your OPA5 test pages (relative to webapp/)
             paths: {
                 webapp: 'webapp'
             }
         },
 
-        // Custom browser: connects to Selenium WebDriver remote
-        // Uses env vars injected by piper so the same config works locally and in CI
-        customLaunchers: {
-            ChromeSelenium: {
-                base: 'WebDriver',
-                config: {
-                    hostname: process.env.PIPER_SELENIUM_WEBDRIVER_HOSTNAME || 'selenium',
-                    port: parseInt(process.env.PIPER_SELENIUM_WEBDRIVER_PORT || '4444', 10)
-                },
-                browserName: 'chrome',
-                name: 'Chrome'
+        // Register our W3C-compatible custom launcher
+        plugins: [
+            'karma-ui5',
+            'karma-junit-reporter',
+            'karma-coverage',
+            {
+                'launcher:CustomChromeSelenium': ['factory', CustomChromeSeleniumFactory]
             }
-        },
+        ],
 
-        browsers: ['ChromeSelenium'],
+        browsers: ['CustomChromeSelenium'],
 
-        // Karma server hostname — must match the docker network alias of the node container.
-        // Selenium needs to reach Karma at this hostname to load the test page.
-        // Piper sets PIPER_SELENIUM_HOSTNAME="karma" as the docker network alias.
+        /**
+         * Karma server hostname = docker network alias of THIS (karma) container.
+         * The Selenium Chrome browser needs to reach http://karma:9876 to load tests.
+         * Piper injects PIPER_SELENIUM_HOSTNAME=karma automatically.
+         */
         hostname: process.env.PIPER_SELENIUM_HOSTNAME || 'karma',
 
         port: 9876,
         listenAddress: '0.0.0.0',
 
-        // JUnit reporter output for Jenkins testsPublishResults
         reporters: ['progress', 'junit'],
 
         junitReporter: {
@@ -67,25 +133,9 @@ module.exports = function (config) {
             useBrowserName: false
         },
 
-        // Coverage reporter (optional but good for SonarQube)
-        // Uncomment if karma-coverage is installed
-        // reporters: ['progress', 'junit', 'coverage'],
-        // preprocessors: {
-        //     'webapp/**/*.js': ['coverage']
-        // },
-        // coverageReporter: {
-        //     dir: 'reports/coverage',
-        //     subdir: '.',
-        //     reporters: [
-        //         { type: 'lcovonly', file: 'lcov.info' },
-        //         { type: 'cobertura', file: 'cobertura-coverage.xml' }
-        //     ]
-        // },
-
         singleRun: true,
         autoWatch: false,
 
-        // Increase timeouts for OPA5 — tests can take longer than unit tests
         browserNoActivityTimeout: 120000,
         browserDisconnectTimeout: 30000,
         browserDisconnectTolerance: 2,

@@ -1,4 +1,4 @@
-const { Builder } = require('selenium-webdriver');
+/*const { Builder } = require('selenium-webdriver');
 const chrome = require('selenium-webdriver/chrome');
 
 function CustomChromeSeleniumFactory(logger, baseBrowserDecorator) {
@@ -131,5 +131,62 @@ module.exports = function (config) {
 
         logLevel: config.LOG_INFO,
         colors: true
+    });
+};
+*/
+module.exports = function (config) {
+    config.set({
+
+        frameworks: ['ui5'],
+
+        ui5: {
+            url: 'https://ui5.sap.com',
+            type: 'application',
+            paths: {
+                webapp: 'webapp'
+            }
+        },
+
+        browsers: ['ChromeHeadless'],
+
+        customLaunchers: {
+            ChromeHeadlessCI: {
+                base: 'ChromeHeadless',
+                flags: [
+                    '--no-sandbox',
+                    '--disable-dev-shm-usage',
+                    '--disable-gpu',
+                    '--window-size=1920,1080'
+                ]
+            }
+        },
+
+        reporters: ['progress', 'junit'],
+
+        junitReporter: {
+            outputDir: 'reports',
+            outputFile: 'TESTS-karma-opa5.xml',
+            suite: 'OPA5',
+            useBrowserName: false
+        },
+
+        port: 9876,
+        colors: true,
+        logLevel: config.LOG_INFO,
+
+        autoWatch: false,
+        singleRun: true,
+
+        browserNoActivityTimeout: 120000,
+        browserDisconnectTimeout: 30000,
+        browserDisconnectTolerance: 2,
+        captureTimeout: 120000,
+
+        plugins: [
+            'karma-ui5',
+            'karma-chrome-launcher',
+            'karma-junit-reporter',
+            'karma-coverage'
+        ]
     });
 };

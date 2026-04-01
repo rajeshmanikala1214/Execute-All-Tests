@@ -13,4 +13,3 @@ modules:
         - npm ci
         - npm run build
       supported-platforms: []
- 

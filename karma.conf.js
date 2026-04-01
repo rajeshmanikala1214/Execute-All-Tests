@@ -46,32 +46,38 @@ function CustomChromeSeleniumFactory(logger, baseBrowserDecorator) {
     baseBrowserDecorator(this);
 
     this._start = async (karmaUrl) => {
-        log.info(`Starting Chrome via selenium-webdriver at ${seleniumUrl}`);
-        log.info(`Karma URL: ${karmaUrl}`);
+    log.info(`Starting Chrome via selenium-webdriver at ${seleniumUrl}`);
+    log.info(`Karma URL: ${karmaUrl}`);
 
-        try {
-            const options = new chrome.Options();
-            options.addArguments(
-                '--headless',
-                '--no-sandbox',
-                '--disable-dev-shm-usage',
-                '--disable-gpu',
-                '--window-size=1920,1080'
-            );
+    try {
+        const options = new chrome.Options();
+        options.addArguments(
+            '--headless',
+            '--no-sandbox',
+            '--disable-dev-shm-usage',
+            '--disable-gpu',
+            '--window-size=1920,1080'
+        );
 
-            driver = await new Builder()
-                .usingServer(seleniumUrl)
-                .forBrowser('chrome')
-                .setChromeOptions(options)
-                .build();
+        driver = await new Builder()
+            .usingServer(seleniumUrl)
+            .forBrowser('chrome')
+            .setChromeOptions(options)
+            .build();
 
-            log.info('Chrome session created, navigating to Karma URL');
-            await driver.get(karmaUrl);
-            log.info('Navigation complete');
-        } catch (err) {
-            log.error('Failed to start Chrome via selenium-webdriver:', err.message);
-            this._done('failure');
-        }
+        log.info('Chrome session created, navigating to Karma URL');
+
+        await driver.get(karmaUrl);
+
+        log.info('Navigation complete');
+
+        // ✅ VERY IMPORTANT: Notify Karma browser is ready
+        this._done();
+
+    } catch (err) {
+        log.error('Failed to start Chrome via selenium-webdriver:', err.message);
+        this._done('failure');
+    }
     };
 
     this.on('kill', async (done) => {

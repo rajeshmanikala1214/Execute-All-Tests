@@ -3,10 +3,11 @@
   "version": "1.0.0",
   "scripts": {
     "start": "ui5 serve --port 8080",
-    "test:opa:ci": "sleep 30 && npm run test:opa",
-    "wdi5:ci": "ui5 serve --port 8080 & sleep 10 && wdio run wdio.conf.js",
-    "test:opa": "ui5-test-runner --url http://host.docker.internal:8080/test/testsuite.qunit.html --start \"ui5 serve --port 8080\" --browser \"webdriver --url http://selenium:4444/wd/hub --browserName chrome\"",
+    "build": "ui5 build",
+    "test:opa": "ui5-test-runner --url http://localhost:8080/test/testsuite.qunit.html --browser \"webdriver --url http://selenium:4444/wd/hub --browserName chrome\"",
+    "test:opa:ci": "ui5 serve --port 8080 & sleep 20 && ui5-test-runner --url http://node:8080/test/testsuite.qunit.html --browser \"webdriver --url http://selenium:4444/wd/hub --browserName chrome\"",
     "wdi5": "wdio run wdio.conf.js",
+    "wdi5:ci": "ui5 serve --port 8080 & sleep 20 && wdio run wdio.conf.js",
     "test:uiveri5": "uiveri5",
     "test": "npm run test:opa"
   },
@@ -20,6 +21,7 @@
     "puppeteer": "^24",
     "ui5-middleware-simpleproxy": "^3.7.0",
     "ui5-test-runner": "^5",
-    "wdio-ui5-service": "^2"
+    "wdio-ui5-service": "^2",
+    "@wdio/junit-reporter": "^8"
   }
 }

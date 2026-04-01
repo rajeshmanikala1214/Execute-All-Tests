@@ -1,0 +1,18 @@
+_schema-version: "3.1"
+ID: execute-test-cases
+description: Execute All Tests - UI5 Application
+version: 1.0.0
+
+modules:
+  - name: execute-test-cases-app
+    type: html5
+    path: .
+    build-parameters:
+      builder: custom
+      commands:
+        - npm ci
+        - npm run build
+      supported-platforms: []
+    parameters:
+      disk-quota: 256M
+      memory: 256M

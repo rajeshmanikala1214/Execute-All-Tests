@@ -13,7 +13,7 @@ stages:
         dockerSidecarImage: 'selenium/standalone-chrome'
         installCommand: "npm ci"
         runCommand: "npm run wdi5"
-        baseUrl: "http://example.com/index.html"
+        baseUrl: "http://localhost:8080/index.html"
         urlOptionPrefix: "--base-url="
         usernameEnvVar: "wdi5_username"
         passwordEnvVar: "wdi5_password"
@@ -28,7 +28,6 @@ stages:
       params:
         script: this
         dockerImage: "devxci/mbtci-java17-node20"
-        dockerImage: 'ndevxci/mbtci-java17-node20'
         runAsRoot: true
         installCommand: "npm install @ui5/uiveri5 --global --quiet"
         runCommand: "/home/node/.npm-global/bin/uiveri5"

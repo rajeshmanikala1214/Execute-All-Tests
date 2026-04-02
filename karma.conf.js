@@ -31,16 +31,17 @@ module.exports = function (config) {
 
         // Standard WebDriver launcher — reads env vars injected by piper
         customLaunchers: {
-            ChromeSelenium: {
-                base: 'WebDriver',
-                config: {
-                    hostname: process.env.PIPER_SELENIUM_WEBDRIVER_HOSTNAME || 'selenium',
-                    port: parseInt(process.env.PIPER_SELENIUM_WEBDRIVER_PORT || '4444', 10)
-                },
-                browserName: 'chrome',
-                name: 'Karma'
-            }
-        },
+  ChromeSelenium: {
+    base: 'WebDriver',
+    config: {
+      hostname: 'selenium',
+      port: 4444,
+      protocol: 'http',
+      path: '/wd/hub'
+    },
+    browserName: 'chrome'
+  }
+},
 
         browsers: ['ChromeSelenium'],
 
